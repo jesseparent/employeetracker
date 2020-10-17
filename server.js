@@ -7,7 +7,8 @@ const generateMainMenu = () => {
       type: 'list',
       name: 'mainChoice',
       message: 'What would you like to do?',
-      choices: ['View all departments',
+      choices: [
+        'View all departments',
         'View all roles',
         'View all employees',
         'Add a department',
@@ -22,6 +23,7 @@ const generateMainMenu = () => {
         console.log("GOOD-BYE!");
       }
       else {
+        console.log(menuChoice.dbIndex);
         processChoice(menuChoice.mainChoice);
         return generateMainMenu();
       }
@@ -29,7 +31,7 @@ const generateMainMenu = () => {
 };
 
 const processChoice = choice => {
-  console.log(choice);
+  console.log(choice.dbIndex);
 };
 
 // function call to initialize program
