@@ -1,5 +1,16 @@
 const inquirer = require('inquirer');
 const db = require('./db/database');
+const viewHandler = require('./utils/viewHandler');
+
+const mainChoices = [
+  'View all departments',
+  'View all roles',
+  'View all employees',
+  'Add a department',
+  'Add a role',
+  'Add an employee',
+  'Update an employee role',
+  'Quit'];
 
 const generateMainMenu = () => {
   inquirer.prompt([
@@ -7,31 +18,38 @@ const generateMainMenu = () => {
       type: 'list',
       name: 'mainChoice',
       message: 'What would you like to do?',
-      choices: [
-        'View all departments',
-        'View all roles',
-        'View all employees',
-        'Add a department',
-        'Add a role',
-        'Add an employee',
-        'Update an employee role',
-        'Quit']
+      choices: mainChoices
     },
   ])
     .then(menuChoice => {
-      if (menuChoice.mainChoice === 'Quit') {
+      if (menuChoice.mainChoice === mainChoices[mainChoices.length - 1]) {
         console.log("GOOD-BYE!");
       }
       else {
-        console.log(menuChoice.dbIndex);
-        processChoice(menuChoice.mainChoice);
-        return generateMainMenu();
+        processChoice(menuChoice.mainChoice, generateMainMenu);
+        //return generateMainMenu();
       }
     });
 };
 
-const processChoice = choice => {
-  console.log(choice.dbIndex);
+const processChoice = (choice, nextAction) => {
+  const crudOperation = choice.split(' ')[0].toLowerCase();
+  switch (crudOperation) {
+    case 'add':
+      console.log('CREATE');
+      break;
+    case 'view':
+      viewHandler(choice, nextAction);
+      break;
+    case 'update':
+      console.log('UPDATE');
+      break;
+    case 'delete':
+      console.log('DELETE');
+      break;
+    default:
+      console.log('Invalid Choice');
+  }
 };
 
 // function call to initialize program
