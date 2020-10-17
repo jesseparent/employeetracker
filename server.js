@@ -1,16 +1,36 @@
 const inquirer = require('inquirer');
 const db = require('./db/database');
 
-afterConnection = () => {
-  // Write a simple query that will SELECT everything from the 'products' table
-  // Log the results in the console
-  //
-  const sqlQuery = 'SELECT * FROM products;';
-  db.query(sqlQuery, function (err, result) {
-    if (err) throw err;
-    console.log(result);
+const generateMainMenu = () => {
+  inquirer.prompt([
+    {
+      type: 'list',
+      name: 'mainChoice',
+      message: 'What would you like to do?',
+      choices: ['View all departments',
+        'View all roles',
+        'View all employees',
+        'Add a department',
+        'Add a role',
+        'Add an employee',
+        'Update an employee role',
+        'Quit']
+    },
+  ])
+    .then(menuChoice => {
+      if (menuChoice.mainChoice === 'Quit') {
+        console.log("GOOD-BYE!");
+      }
+      else {
+        processChoice(menuChoice.mainChoice);
+        return generateMainMenu();
+      }
+    });
+};
 
-    db.end();
-  });
-}
-afterConnection();
+const processChoice = choice => {
+  console.log(choice);
+};
+
+// function call to initialize program
+generateMainMenu();
