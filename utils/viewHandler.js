@@ -8,21 +8,13 @@ const viewHandler = (choice, nextAction, db) => {
   // Generate the SQL Query based on the user choice
   switch (choice) {
     case 'View all departments':
-      sqlQuery = `SELECT * FROM department;`;
+      viewDepartments(nextAction, db);
       break;
     case 'View all roles':
-      sqlQuery = `SELECT r.id, r.title, r.salary, d.name AS department
-      FROM role r
-      JOIN department d ON d.id = r.department_id
-      ORDER BY r.id ASC;`;
+      viewRoles(nextAction, db);
       break;
     case 'View all employees':
-      sqlQuery = `SELECT e.id, e.first_name, e.last_name, r.title, d.name AS department, r.salary, CONCAT(e2.first_name, " ", e2.last_name) AS manager
-      FROM employee e
-      LEFT JOIN employee e2 ON e2.id = e.manager_id
-      JOIN role r ON r.id = e.role_id
-      JOIN department d ON d.id = r.department_id
-      ORDER BY e.id ASC`;
+      viewEmployees(nextAction, db);
       break;
     case 'View all employees by manager':
       viewEmployeesByManager(nextAction, db);
@@ -48,9 +40,54 @@ const viewHandler = (choice, nextAction, db) => {
   }
 };
 
+// Process the database query
+const processQuery = (sqlQuery, nextAction, db, keyValues = {}) => {
+  //Execute the SQL Query
+  db.query(sqlQuery, keyValues, function (err, result) {
+    if (err) throw err;
+    console.table(result);
+    nextAction();
+  });
+}
+
+// View all Departments
+const viewDepartments = (nextAction, db) => {
+  const sqlQuery = `SELECT * FROM department;`;
+
+  processQuery(sqlQuery, nextAction, db);
+};
+
+// View all Roles
+const viewRoles = (nextAction, db) => {
+  sqlQuery = `SELECT r.id, r.title, r.salary, d.name AS department
+      FROM role r
+      JOIN department d ON d.id = r.department_id
+      ORDER BY r.id ASC;`;
+
+  processQuery(sqlQuery, nextAction, db);
+};
+
+// View all Employees
+const viewEmployees = (nextAction, db) => {
+  sqlQuery = `SELECT e.id, e.first_name, e.last_name, r.title, d.name AS department, r.salary, CONCAT(e2.first_name, " ", e2.last_name) AS manager
+      FROM employee e
+      LEFT JOIN employee e2 ON e2.id = e.manager_id
+      JOIN role r ON r.id = e.role_id
+      JOIN department d ON d.id = r.department_id
+      ORDER BY e.id ASC`;
+
+  processQuery(sqlQuery, nextAction, db);
+};
+
+// View all Employees reporting to a specific manager
 const viewEmployeesByManager = (nextAction, db) => {
   // Get the Employee list
-  db.query('SELECT CONCAT(first_name, " ", last_name) AS name FROM employee', function (err, result) {
+  const currentManagersQuery = `SELECT DISTINCT CONCAT(e2.first_name, " ", e2.last_name) AS name
+  FROM employee e1
+  JOIN employee e2 WHERE e2.id = e1.manager_id
+  ORDER BY e2.first_name`;
+
+  db.query(currentManagersQuery, function (err, result) {
     if (err) throw err;
 
     inquirer.prompt([
@@ -78,16 +115,12 @@ const viewEmployeesByManager = (nextAction, db) => {
         (SELECT id FROM employee WHERE ? AND ?) 
         ORDER BY e.id ASC`;
 
-        //Execute the SQL Query
-        db.query(sqlQuery, nameColumns, function (err, result) {
-          if (err) throw err;
-          console.table(result);
-          nextAction();
-        });
+        processQuery(sqlQuery, nextAction, db, nameColumns);
       });
   });
 };
 
+// View all Employees in a Department
 const viewEmployeesByDepartment = (nextAction, db) => {
   // Get the Department list
   db.query('SELECT name FROM department', function (err, result) {
@@ -110,16 +143,12 @@ const viewEmployeesByDepartment = (nextAction, db) => {
         WHERE ?
         ORDER BY e.id ASC`;
 
-        //Execute the SQL Query
-        db.query(sqlQuery, department, function (err, result) {
-          if (err) throw err;
-          console.table(result);
-          nextAction();
-        });
+        processQuery(sqlQuery, nextAction, db, department);
       });
   });
 };
 
+// View Budget for a specific Department
 const viewBudgets = (nextAction, db) => {
   // Get the Department list
   db.query('SELECT name FROM department', function (err, result) {
@@ -141,12 +170,7 @@ const viewBudgets = (nextAction, db) => {
         GROUP BY d.name
         ORDER BY 2 ASC;`;
 
-        //Execute the SQL Query
-        db.query(sqlQuery, department, function (err, result) {
-          if (err) throw err;
-          console.table(result);
-          nextAction();
-        });
+        processQuery(sqlQuery, nextAction, db, department);
       });
   });
 };
