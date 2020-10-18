@@ -1,4 +1,5 @@
 const inquirer = require('inquirer');
+const addHandler = require('./utils/addHandler');
 const viewHandler = require('./utils/viewHandler');
 const db = require('./db/database');
 
@@ -42,7 +43,7 @@ const processChoice = (choice, nextAction) => {
   const crudOperation = choice.split(' ')[0].toLowerCase();
   switch (crudOperation) {
     case 'add':
-      console.log('CREATE');
+      addHandler(choice, nextAction, db);
       break;
     case 'view':
       viewHandler(choice, nextAction, db);

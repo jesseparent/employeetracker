@@ -3,9 +3,7 @@ const inquirer = require('inquirer');
 
 // Handle all Read/View operations of our CRUD
 const viewHandler = (choice, nextAction, db) => {
-  let sqlQuery = null;
-
-  // Generate the SQL Query based on the user choice
+  // Process the user choice
   switch (choice) {
     case 'View all departments':
       viewDepartments(nextAction, db);
@@ -29,15 +27,6 @@ const viewHandler = (choice, nextAction, db) => {
       console.log('Unrecognized Option!');
       nextAction();
   }
-
-  // Execute the SQL Query
-  if (sqlQuery) {
-    db.query(sqlQuery, function (err, result) {
-      if (err) throw err;
-      console.table(result);
-      nextAction();
-    });
-  }
 };
 
 // Process the database query
@@ -48,7 +37,7 @@ const processQuery = (sqlQuery, nextAction, db, keyValues = {}) => {
     console.table(result);
     nextAction();
   });
-}
+};
 
 // View all Departments
 const viewDepartments = (nextAction, db) => {
@@ -175,4 +164,4 @@ const viewBudgets = (nextAction, db) => {
   });
 };
 
-module.exports = viewHandler
+module.exports = viewHandler;
