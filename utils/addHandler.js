@@ -1,4 +1,3 @@
-const cTable = require('console.table');
 const inquirer = require('inquirer');
 
 // Handle all Create/Add operations of our CRUD
