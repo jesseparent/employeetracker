@@ -30,10 +30,11 @@ const viewHandler = (choice, nextAction, db) => {
 };
 
 // Process the database query
-const processQuery = (sqlQuery, nextAction, db, keyValues = {}) => {
+const processQueryWithTable = (sqlQuery, nextAction, db, keyValues = {}) => {
   //Execute the SQL Query
   db.query(sqlQuery, keyValues, function (err, result) {
     if (err) throw err;
+    // Display table of results
     console.table(result);
     nextAction();
   });
@@ -43,7 +44,7 @@ const processQuery = (sqlQuery, nextAction, db, keyValues = {}) => {
 const viewDepartments = (nextAction, db) => {
   const sqlQuery = `SELECT * FROM department;`;
 
-  processQuery(sqlQuery, nextAction, db);
+  processQueryWithTable(sqlQuery, nextAction, db);
 };
 
 // View all Roles
@@ -53,7 +54,7 @@ const viewRoles = (nextAction, db) => {
       JOIN department d ON d.id = r.department_id
       ORDER BY r.id ASC;`;
 
-  processQuery(sqlQuery, nextAction, db);
+  processQueryWithTable(sqlQuery, nextAction, db);
 };
 
 // View all Employees
@@ -65,18 +66,18 @@ const viewEmployees = (nextAction, db) => {
       JOIN department d ON d.id = r.department_id
       ORDER BY e.id ASC`;
 
-  processQuery(sqlQuery, nextAction, db);
+  processQueryWithTable(sqlQuery, nextAction, db);
 };
 
 // View all Employees reporting to a specific manager
 const viewEmployeesByManager = (nextAction, db) => {
-  // Get the Employee list
+  // Get the list of Employees that are already set as a Manager
   const currentManagersQuery = `SELECT DISTINCT CONCAT(e2.first_name, " ", e2.last_name) AS name
   FROM employee e1
   JOIN employee e2 WHERE e2.id = e1.manager_id
   ORDER BY e2.first_name`;
 
-  db.query(currentManagersQuery, function (err, result) {
+  db.query(currentManagersQuery, function (err, managerList) {
     if (err) throw err;
 
     inquirer.prompt([
@@ -84,7 +85,7 @@ const viewEmployeesByManager = (nextAction, db) => {
         type: 'list',
         name: 'name',
         message: 'Which manager would you like to view the employees for?',
-        choices: result
+        choices: managerList
       }
     ])
       .then(manager => {
@@ -104,7 +105,7 @@ const viewEmployeesByManager = (nextAction, db) => {
         (SELECT id FROM employee WHERE ? AND ?) 
         ORDER BY e.id ASC`;
 
-        processQuery(sqlQuery, nextAction, db, nameColumns);
+        processQueryWithTable(sqlQuery, nextAction, db, nameColumns);
       });
   });
 };
@@ -112,7 +113,7 @@ const viewEmployeesByManager = (nextAction, db) => {
 // View all Employees in a Department
 const viewEmployeesByDepartment = (nextAction, db) => {
   // Get the Department list
-  db.query('SELECT name FROM department', function (err, result) {
+  db.query('SELECT name FROM department', function (err, departmentList) {
     if (err) throw err;
 
     inquirer.prompt([
@@ -120,7 +121,7 @@ const viewEmployeesByDepartment = (nextAction, db) => {
         type: 'list',
         name: 'name',
         message: 'Which department would you like to view the employees for?',
-        choices: result
+        choices: departmentList
       }
     ])
       .then(department => {
@@ -132,7 +133,7 @@ const viewEmployeesByDepartment = (nextAction, db) => {
         WHERE ?
         ORDER BY e.id ASC`;
 
-        processQuery(sqlQuery, nextAction, db, department);
+        processQueryWithTable(sqlQuery, nextAction, db, department);
       });
   });
 };
@@ -140,7 +141,7 @@ const viewEmployeesByDepartment = (nextAction, db) => {
 // View Budget for a specific Department
 const viewBudgets = (nextAction, db) => {
   // Get the Department list
-  db.query('SELECT name FROM department', function (err, result) {
+  db.query('SELECT name FROM department', function (err, departmentList) {
     if (err) throw err;
 
     inquirer.prompt([
@@ -148,7 +149,7 @@ const viewBudgets = (nextAction, db) => {
         type: 'list',
         name: 'name',
         message: 'Which department would you like to view the budget for?',
-        choices: result
+        choices: departmentList
       }
     ])
       .then(department => {
@@ -159,7 +160,7 @@ const viewBudgets = (nextAction, db) => {
         GROUP BY d.name
         ORDER BY 2 ASC;`;
 
-        processQuery(sqlQuery, nextAction, db, department);
+        processQueryWithTable(sqlQuery, nextAction, db, department);
       });
   });
 };

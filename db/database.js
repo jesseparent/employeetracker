@@ -3,6 +3,8 @@ const mysql = require('mysql2');
 
 const database = 'employee_trackerDB'; // Database name
 
+// Generate object containing database connection information 
+// Use environment variables for security
 const dbConn = {
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
@@ -11,8 +13,10 @@ const dbConn = {
   database: database
 };
 
+// Object holding database information
 const db = mysql.createConnection(dbConn);
 
+// Connect to database
 db.connect(err => {
   if (err) throw err;
 });

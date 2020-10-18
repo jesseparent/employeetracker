@@ -1,4 +1,5 @@
 const inquirer = require('inquirer');
+const processQuery = require('../db/processQuery');
 
 // Handle all Update operations of our CRUD
 const updateHandler = (choice, nextAction, db) => {
@@ -16,19 +17,6 @@ const updateHandler = (choice, nextAction, db) => {
   }
 };
 
-// Process the database query
-const processQuery = (sqlQuery, nextAction, db, successMessage, keyValues = {}) => {
-  //Execute the SQL Query
-  db.query(sqlQuery, keyValues, function (err, result) {
-    if (err) {
-      console.log(err);
-      throw err;
-    }
-    console.log(successMessage);
-    nextAction();
-  });
-};
-
 // Update an Employee's Role
 const updateEmployeeRole = (nextAction, db) => {
   db.query('SELECT id, CONCAT(first_name, " ", last_name) AS name FROM employee', function (err, employeeList) {
@@ -43,7 +31,7 @@ const updateEmployeeRole = (nextAction, db) => {
       }
     ])
       .then(employeeSelection => {
-        db.query('SELECT title AS name FROM role', function (err, result) {
+        db.query('SELECT id, title AS name FROM role', function (err, roleList) {
           if (err) throw err;
 
           inquirer.prompt([
@@ -51,18 +39,22 @@ const updateEmployeeRole = (nextAction, db) => {
               type: 'list',
               name: 'title',
               message: 'Which role will this employee have?',
-              choices: result
+              choices: roleList
             }])
             .then(roleSelection => {
-              // Get the manager selected and their ID
+              // Get the Employee selected and their ID
               const employeeObj = employeeList.filter(employee => employee.name == employeeSelection.name)[0];
+              // Get the Role selected and its ID
 
+              const roleObj = roleList.filter(role => role.name == roleSelection.title)[0];
+
+              // Update the employee's role
               const sqlQuery = `UPDATE employee   
-              SET role_id = (SELECT id from role where ?)
+              SET ?
               WHERE ?`;
 
               const parameters = [
-                { title: roleSelection.title },
+                { role_id: roleObj.id },
                 { id: employeeObj.id }
               ];
 
@@ -106,6 +98,7 @@ const updateEmployeeManager = (nextAction, db) => {
               // Get the Employee to be edited
               const employeeObj = employeeList.filter(employee => employee.name == employeeSelection.name)[0];
 
+              // Update the Employee's manager
               const sqlQuery = `UPDATE employee   
               SET ?
               WHERE ?`;

@@ -1,4 +1,5 @@
 const inquirer = require('inquirer');
+const processQuery = require('../db/processQuery');
 
 // Handle all Delete operations of our CRUD
 const deleteHandler = (choice, nextAction, db) => {
@@ -17,19 +18,6 @@ const deleteHandler = (choice, nextAction, db) => {
       console.log('Unrecognized Option!');
       nextAction();
   }
-};
-
-// Process the database query
-const processQuery = (sqlQuery, nextAction, db, successMessage, keyValues = {}) => {
-  //Execute the SQL Query
-  db.query(sqlQuery, keyValues, function (err, result) {
-    if (err) {
-      console.log(err);
-      throw err;
-    }
-    console.log(successMessage);
-    nextAction();
-  });
 };
 
 // Delete a Department
@@ -55,6 +43,7 @@ const deleteDepartment = (nextAction, db) => {
         if (departmentSelection.delete) {
           const departmentObj = departmentList.filter(department => department.name == departmentSelection.name)[0];
 
+          // Delete the department
           const sqlQuery = `DELETE FROM department WHERE ?`;
 
           const parameters = [
@@ -95,6 +84,7 @@ const deleteRole = (nextAction, db) => {
         if (roleSelection.delete) {
           const roleObj = roleList.filter(role => role.name == roleSelection.name)[0];
 
+          // Delete the Role
           const sqlQuery = `DELETE FROM role WHERE ?`;
 
           const parameters = [
@@ -121,7 +111,7 @@ const deleteEmployee = (nextAction, db) => {
       {
         type: 'list',
         name: 'name',
-        message: 'Which role would you like to delete?',
+        message: 'Which employee would you like to delete?',
         choices: employeeList
       },
       {
@@ -134,19 +124,17 @@ const deleteEmployee = (nextAction, db) => {
       .then(employeeSelection => {
         if (employeeSelection.delete) {
           const employeeObj = employeeList.filter(employee => employee.name == employeeSelection.name)[0];
-          db.query('UPDATE employee SET manager_id=null WHERE manager_id=' + employeeObj.id, function (err, employeeList) {
-            if (err) throw err;
 
-            const sqlQuery = `DELETE FROM employee WHERE ?`;
+          // Delete the Employee
+          const sqlQuery = `DELETE FROM employee WHERE ?`;
 
-            const parameters = [
-              { id: employeeObj.id }
-            ];
+          const parameters = [
+            { id: employeeObj.id }
+          ];
 
-            const successMessage = 'Deleted "' + employeeSelection.name + '" from the database';
+          const successMessage = 'Deleted "' + employeeSelection.name + '" from the database';
 
-            processQuery(sqlQuery, nextAction, db, successMessage, parameters);
-          });
+          processQuery(sqlQuery, nextAction, db, successMessage, parameters);
         }
         else {
           nextAction();

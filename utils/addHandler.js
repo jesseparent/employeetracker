@@ -1,4 +1,5 @@
 const inquirer = require('inquirer');
+const processQuery = require('../db/processQuery');
 
 // Handle all Create/Add operations of our CRUD
 const addHandler = (choice, nextAction, db) => {
@@ -17,19 +18,6 @@ const addHandler = (choice, nextAction, db) => {
       console.log('Unrecognized Option!');
       nextAction();
   }
-};
-
-// Process the database query
-const processQuery = (sqlQuery, nextAction, db, successMessage, keyValues = {}) => {
-  //Execute the SQL Query
-  db.query(sqlQuery, keyValues, function (err, result) {
-    if (err) {
-      console.log(err);
-      throw err;
-    }
-    console.log(successMessage);
-    nextAction();
-  });
 };
 
 // Add a Department
@@ -60,7 +48,7 @@ const addDepartment = (nextAction, db) => {
 // Add a Role to a Department
 const addRole = (nextAction, db) => {
   // Get the Department list
-  db.query('SELECT name FROM department', function (err, result) {
+  db.query('SELECT id, name FROM department', function (err, departmentList) {
     if (err) throw err;
 
     inquirer.prompt([
@@ -68,7 +56,7 @@ const addRole = (nextAction, db) => {
         type: 'list',
         name: 'name',
         message: 'Which department would you like to add this role to?',
-        choices: result
+        choices: departmentList
       },
       {
         type: 'input',
@@ -99,10 +87,14 @@ const addRole = (nextAction, db) => {
       }
     ])
       .then(role => {
-        const sqlQuery = `INSERT INTO role SET ?, department_id = (SELECT id from department where ?)`;
+        // Get Department selected for Role
+        const departmentObj = departmentList.filter(dept => dept.name == role.name)[0];
+
+        // Add a Role to the specified Department
+        const sqlQuery = `INSERT INTO role SET ?, ?`;
         const parameters = [
           { title: role.title, salary: role.salary },
-          { name: role.name }
+          { department_id: departmentObj.id }
         ];
         const successMessage = 'Added "' + role.title + '" to roles with a salary of $' + role.salary;
         processQuery(sqlQuery, nextAction, db, successMessage, parameters);
@@ -113,7 +105,7 @@ const addRole = (nextAction, db) => {
 // Add an Employee 
 const addEmployee = (nextAction, db) => {
   // Get the Role list
-  db.query('SELECT title AS name FROM role', function (err, result) {
+  db.query('SELECT id, title AS name FROM role', function (err, roleList) {
     if (err) throw err;
 
     inquirer.prompt([
@@ -121,7 +113,7 @@ const addEmployee = (nextAction, db) => {
         type: 'list',
         name: 'title',
         message: 'Which role will this employee have?',
-        choices: result
+        choices: roleList
       },
       {
         type: 'input',
@@ -165,14 +157,17 @@ const addEmployee = (nextAction, db) => {
             .then(managerSelection => {
               // Get the manager selected and their ID
               const managerObj = managerList.filter(manager => manager.name == managerSelection.name)[0];
+              // Get the role selected
+              const roleObj = roleList.filter(role => role.name == employee.title)[0];
 
+              // Add employee with specified manager and role
               const sqlQuery = `INSERT INTO employee SET ?, 
-              role_id = (SELECT id from role where ?),
+              ?,
               ?`;
 
               const parameters = [
                 { first_name: employee.first_name, last_name: employee.last_name },
-                { title: employee.title },
+                { role_id: roleObj.id },
                 { manager_id: managerObj.id }
               ];
 
