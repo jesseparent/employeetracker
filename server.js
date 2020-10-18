@@ -1,6 +1,6 @@
 const inquirer = require('inquirer');
 const viewHandler = require('./utils/viewHandler');
-const { db, closeDB } = require('./db/database');
+const db = require('./db/database');
 
 
 const mainChoices = [

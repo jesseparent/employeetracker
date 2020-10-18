@@ -18,9 +18,4 @@ db.connect(err => {
 });
 
 
-
-const closeDB = () => {
-  db.end();
-}
-
-module.exports = { db, closeDB };
+module.exports = db;
