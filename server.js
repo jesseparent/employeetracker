@@ -2,6 +2,7 @@ const inquirer = require('inquirer');
 const addHandler = require('./utils/addHandler');
 const viewHandler = require('./utils/viewHandler');
 const updateHandler = require('./utils/updateHandler');
+const deleteHandler = require('./utils/deleteHandler');
 const db = require('./db/database');
 
 // Inquirer choices for main menu
@@ -17,6 +18,9 @@ const mainChoices = [
   'Add an employee',
   'Update an employee\'s role',
   'Update an employee\'s manager',
+  'Delete a department',
+  'Delete a role',
+  'Delete an employee',
   'Quit'];
 
 // Generate the main menu for user to make selections
@@ -54,7 +58,7 @@ const processChoice = (choice, nextAction) => {
       updateHandler(choice, nextAction, db);
       break;
     case 'delete':
-      console.log('DELETE');
+      deleteHandler(choice, nextAction, db);
       break;
     default:
       console.log('Invalid Choice');

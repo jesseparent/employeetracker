@@ -1,6 +1,6 @@
 const inquirer = require('inquirer');
 
-// Handle all Create/Add operations of our CRUD
+// Handle all Update operations of our CRUD
 const updateHandler = (choice, nextAction, db) => {
   // Process the user choice
   switch (choice) {
