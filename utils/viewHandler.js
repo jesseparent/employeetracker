@@ -1,9 +1,8 @@
 const cTable = require('console.table');
 const inquirer = require('inquirer');
-const db = require('../db/database');
 
 // Handle all Read/View operations of our CRUD
-const viewHandler = (choice, nextAction) => {
+const viewHandler = (choice, nextAction, db) => {
   let sqlQuery = null;
 
   // Generate the SQL Query based on the user choice
@@ -26,13 +25,13 @@ const viewHandler = (choice, nextAction) => {
       ORDER BY e.id ASC`;
       break;
     case 'View all employees by manager':
-      viewEmployeesByManager(nextAction);
+      viewEmployeesByManager(nextAction, db);
       break;
     case 'View all employees by department':
-      viewEmployeesByDepartment(nextAction);
+      viewEmployeesByDepartment(nextAction, db);
       break;
     case 'View total utilized budget by department':
-      viewBudgets(nextAction);
+      viewBudgets(nextAction, db);
       break;
     default:
       console.log('Unrecognized Option!');
@@ -49,7 +48,7 @@ const viewHandler = (choice, nextAction) => {
   }
 };
 
-const viewEmployeesByManager = (nextAction) => {
+const viewEmployeesByManager = (nextAction, db) => {
   // Get the Employee list
   db.query('SELECT CONCAT(first_name, " ", last_name) AS name FROM employee', function (err, result) {
     if (err) throw err;
@@ -89,7 +88,7 @@ const viewEmployeesByManager = (nextAction) => {
   });
 };
 
-const viewEmployeesByDepartment = (nextAction) => {
+const viewEmployeesByDepartment = (nextAction, db) => {
   // Get the Department list
   db.query('SELECT name FROM department', function (err, result) {
     if (err) throw err;
@@ -121,7 +120,7 @@ const viewEmployeesByDepartment = (nextAction) => {
   });
 };
 
-const viewBudgets = (nextAction) => {
+const viewBudgets = (nextAction, db) => {
   // Get the Department list
   db.query('SELECT name FROM department', function (err, result) {
     if (err) throw err;

@@ -1,6 +1,7 @@
 const inquirer = require('inquirer');
-const db = require('./db/database');
 const viewHandler = require('./utils/viewHandler');
+const { db, closeDB } = require('./db/database');
+
 
 const mainChoices = [
   'View all departments',
@@ -25,12 +26,12 @@ const generateMainMenu = () => {
     },
   ])
     .then(menuChoice => {
-      if (menuChoice.mainChoice === mainChoices[mainChoices.length - 1]) {
+      if (menuChoice.mainChoice === 'Quit') {
+        db.end();
         console.log("GOOD-BYE!");
       }
       else {
         processChoice(menuChoice.mainChoice, generateMainMenu);
-        //return generateMainMenu();
       }
     });
 };
@@ -42,7 +43,7 @@ const processChoice = (choice, nextAction) => {
       console.log('CREATE');
       break;
     case 'view':
-      viewHandler(choice, nextAction);
+      viewHandler(choice, nextAction, db);
       break;
     case 'update':
       console.log('UPDATE');
