@@ -42,4 +42,4 @@ Feel free to contact the developer at jesse@parent.com about contributing to htt
 
 ## Video
 
-A video demo of this project can be found at https://screencast-o-matic.com/watch/cY6qcc7aZB
+A video demo of this project can be found at https://screencast-o-matic.com/watch/cY6qcC7aAV
